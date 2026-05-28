@@ -23,7 +23,7 @@ const cartSlice = createSlice({
                 state.error = null;
             })
             .addCase(getCartItems.fulfilled, (state, action) => {
-                state.items = action.payload.items || [];
+                state.items = action.payload || [];
                 state.loading = false;
                 state.error = null;
             })

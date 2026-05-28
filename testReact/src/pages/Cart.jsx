@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { getCartItems, removeFromCart } from "../redux/thunks/cartThunks";
 import { Link } from "react-router-dom";
@@ -12,6 +12,10 @@ const Cart = () => {
         dispatch(getCartItems());
     }, [dispatch]);
 
+    const [total, setTotal] = useState(0);
+    useEffect(() => {
+        setTotal(items.reduce((acc, item) => acc + item.price , 0));
+    }, [items]);
 
     // Remove Item from Cart
     const handleRemoveFromCart = (productId) => {
@@ -25,8 +29,6 @@ const Cart = () => {
         }
     };
 
-    console.log(items);
-    
     if (loading) {
         return <div className="text-center py-20 text-xl text-zinc-400">Loading your cart...</div>;
     }
