@@ -1,4 +1,4 @@
-import { FaCartShopping, FaUser, FaTimeline } from "react-icons/fa6"
+import { FaCartShopping, FaUser, FaTimeline, FaFirstOrder, FaRegFolder, FaFirstOrderAlt, FaProductHunt, FaShop } from "react-icons/fa6"
 import { Link, useNavigate } from "react-router-dom"
 import { useDispatch } from "react-redux"
 import { logout } from "../redux/slice/authSlice"
@@ -35,6 +35,12 @@ function Navbar() {
                     <div className="hidden md:flex items-center gap-8 text-lg">
                         {isLoggedIn ? (
                             <>
+                                <Link to="/" className="flex items-center gap-2 hover:text-violet-400 transition-colors">
+                                    <FaShop className="text-xl" /> Products
+                                </Link>
+                                <Link to="/orders" className="flex items-center gap-2 hover:text-violet-400 transition-colors">
+                                    <FaFirstOrderAlt className="text-xl" /> Order History
+                                </Link>
                                 <Link
                                     to="/cart"
                                     className="flex items-center gap-2 hover:text-violet-400 transition-colors"

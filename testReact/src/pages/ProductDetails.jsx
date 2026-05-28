@@ -40,7 +40,7 @@ const ProductDetails = () => {
                         onClick={() => navigate(-1)}
                         className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors text-lg"
                     >
-                        ← Back to Products
+                        ← Back
                     </button>
                 </div>
 

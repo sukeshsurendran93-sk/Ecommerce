@@ -1,45 +1,55 @@
 import mongoose from "mongoose";
 
-const orderSchema = new mongoose.Schema(
-  {
-    user: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      required: true
+const orderSchema = new mongoose.Schema({
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+    required: true,
+  },
+  product: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Product",
+    required: true,
+  },
+  totalAmount: {
+    type: Number,
+    required: true,
+  },
+  shippingAddress: {
+    fullName: {
+      type: String,
+      required: true,
     },
-    orderItems: [
-      {
-        product: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Product"
-        },
-        name: String,
-        qty: Number,
-        image: String,
-        price: Number,
-      },
-    ],
-    shippingAddress: {
-      address: String,
-      city: String,
-      postalCode: String,
-      country: String,
+    phone: {
+      type: String,
+      required: true,
     },
-    totalPrice: {
-      type: Number,
-      required: true
+    address: {
+      type: String,
+      required: true,
     },
-    isPaid: {
-      type: Boolean,
-      default: false
+    city: {
+      type: String,
+      required: true,
     },
-    paidAt: Date,
-    isDelivered: {
-      type: Boolean,
-      default: false
+    state: {
+      type: String,
+      required: true,
     },
-    deliveredAt: Date,
-  }
-);
+    pincode: {
+      type: String,
+      required: true,
+    },
+  },
+  status: {
+    type: String,
+    enum: ["Pending", "Confirmed", "Shipped", "Delivered", "Cancelled"],
+    default: "Pending",
+  },
+  paymentMethod: {
+    type: String,
+    default: "Cash on Delivery",
+  },
+});
 
 export default mongoose.model("Order", orderSchema);

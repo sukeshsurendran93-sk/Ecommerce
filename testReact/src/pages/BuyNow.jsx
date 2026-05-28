@@ -49,7 +49,7 @@ const BuyNow = () => {
         try {
             const orderData = {
                 productId,
-                quantity: 1,
+                totalAmount: product.price,
                 shippingAddress: {
                     fullName: formData.fullName,
                     phone: formData.phone,
@@ -62,7 +62,7 @@ const BuyNow = () => {
 
             await api.post("/orders", orderData);
             alert("Order placed successfully! 🎉");
-            navigate("/orders");
+            navigate("/");
         } catch (error) {
             console.error(error);
             alert("Failed to place order");
@@ -183,11 +183,11 @@ const BuyNow = () => {
                         disabled={isPlacingOrder}
                         className="w-full mt-10 bg-gradient-to-r from-violet-500 to-fuchsia-500 py-5 rounded-3xl font-semibold text-xl hover:brightness-110 active:scale-95 transition-all disabled:opacity-70"
                     >
-                        {isPlacingOrder ? "Placing Order..." : `Pay ₹${product.price} & Place Order`}
+                        {isPlacingOrder ? "Please Wait..." : "Book Order"}
                     </button>
 
                     <p className="text-center text-zinc-500 text-sm mt-4">
-                        Cash on Delivery Available
+                        Payable After Delivery ₹{product.price}
                     </p>
                 </div>
             </div>

@@ -10,6 +10,7 @@ import AddProduct from "./pages/Admin/AddProduct"
 import EditProduct from "./pages/Admin/EditProduct"
 import Cart from "./pages/Cart"
 import BuyNow from "./pages/BuyNow"
+import Orders from "./pages/Orders"
 
 function App() {
   const { token, role } = useSelector((state) => state.auth)
@@ -25,6 +26,7 @@ function App() {
         {role === "admin" && <Route path="/edit-product/:id" element={<EditProduct />} />}
         {token && <Route path="/cart" element={<Cart />} />}
         {token && <Route path="/buy-now/:productId" element={<BuyNow />} />}
+        {token && <Route path="/orders" element={<Orders />} />}
       </Routes>
     </div>
   )
