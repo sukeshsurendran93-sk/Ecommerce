@@ -1,12 +1,14 @@
 import axios from "axios";
-import { useState } from "react";
-import { useDispatch } from "react-redux";
-import { useNavigate } from "react-router-dom";
-// import { addProduct } from "../redux/thunks/productThunk";
+import { useEffect, useState } from "react";
+import { useNavigate, useParams } from "react-router-dom";
 
 const EditProduct = () => {
-    const dispatch = useDispatch();
+    const { id } = useParams();
     const navigate = useNavigate();
+
+    const [product, setProduct] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const [formData, setFormData] = useState({
         name: "",
@@ -14,93 +16,129 @@ const EditProduct = () => {
         category: "",
         stock: "",
         description: "",
-        image: null,           // Will store File object
+        image: null,
     });
 
     const [imagePreview, setImagePreview] = useState(null);
-    const [isLoading, setIsLoading] = useState(false);
+    const [existingImage, setExistingImage] = useState(null);
+
+    useEffect(() => {
+        const fetchProduct = async () => {
+            try {
+                const res = await axios.get(
+                    `${import.meta.env.VITE_API_URL}/products/${id}`,
+                    {
+                        headers: {
+                            Authorization: `Bearer ${localStorage.getItem("token")}`,
+                        },
+                    }
+                );
+
+                if (res.data) {
+                    setProduct(res.data);
+                    setExistingImage(res.data.image);
+
+                    setFormData({
+                        name: res.data.name || "",
+                        price: res.data.price || "",
+                        category: res.data.category || "",
+                        stock: res.data.stock || "",
+                        description: res.data.description || "",
+                        image: null,
+                    });
+
+                    if (res.data.image) {
+                        setImagePreview(`${import.meta.env.VITE_BASE_URL}${res.data.image}`);
+                    }
+                }
+            } catch (err) {
+                console.error("Failed to fetch product:", err);
+                alert("Failed to load product details");
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchProduct();
+    }, [id]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
+        setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
     const handleImageChange = (e) => {
         const file = e.target.files[0];
+        if (!file) return;
 
-        if (file) {
-            // Validate file type
-            if (!file.type.startsWith("image/")) {
-                alert("Please upload a valid image file");
-                return;
-            }
-
-            // Validate file size (max 5MB)
-            if (file.size > 5 * 1024 * 1024) {
-                alert("Image size should be less than 5MB");
-                return;
-            }
-
-            setFormData({ ...formData, image: file });
-
-            // Create preview
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setImagePreview(reader.result);
-            };
-            reader.readAsDataURL(file);
-        }
-    };
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-
-        if (!formData.image) {
-            alert("Please upload a product image");
+        if (!file.type.startsWith("image/")) {
+            alert("Please upload a valid image file");
             return;
         }
 
-        setIsLoading(true);
+        if (file.size > 5 * 1024 * 1024) {
+            alert("Image size should be less than 5MB");
+            return;
+        }
 
-        axios.post(import.meta.env.VITE_API_URL + "/products", formData, {
-            headers: {
-                "Content-Type": "multipart/form-data",
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
-            },
-        })
-            .then((res) => {
-                if (res.status === 201) {
-                    alert("Product added successfully!");
-                    navigate('/')
-                } else {
-                    alert("Failed to add product");
-                }
+        setFormData((prev) => ({ ...prev, image: file }));
 
-            })
-            .catch((err) => {
-                console.log(err)
-            });
-        // dispatch(addProduct(formData)); // Redux dispatch (FormData recommended for files)
-
-
-        // Reset form
-        setFormData({
-            name: "",
-            price: "",
-            category: "",
-            stock: "",
-            description: "",
-            image: null,
-        });
-        setImagePreview(null);
-        setIsLoading(false);
+        const reader = new FileReader();
+        reader.onloadend = () => setImagePreview(reader.result);
+        reader.readAsDataURL(file);
     };
+
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+
+        try {
+            const data = new FormData();
+
+            data.append("name", formData.name);
+            data.append("price", formData.price);
+            data.append("category", formData.category);
+            data.append("stock", formData.stock);
+            data.append("description", formData.description);
+
+            if (formData.image) {
+                data.append("image", formData.image);
+            }
+
+            const res = await axios.put(
+                `${import.meta.env.VITE_API_URL}/products/${id}`,
+                data,
+                {
+                    headers: {
+                        "Content-Type": "multipart/form-data",
+                        Authorization: `Bearer ${localStorage.getItem("token")}`,
+                    },
+                }
+            );
+
+            if (res.status === 200) {
+                alert("Product updated successfully!");
+                navigate("/");
+            }
+        } catch (err) {
+            console.error(err);
+            alert(err.response?.data?.message || "Failed to update product");
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    if (loading) {
+        return <div className="p-8 text-center text-xl">Loading product details...</div>;
+    }
 
     return (
         <div className="p-8">
             <div className="max-w-7xl mx-auto">
                 <div className="bg-zinc-900 border border-zinc-700 rounded-3xl shadow-2xl p-10">
-                    <h2 className="text-4xl font-bold text-center mb-8 text-white">Add New Product</h2>
+                    <h2 className="text-4xl font-bold text-center mb-8 text-white">
+                        Edit Product
+                    </h2>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -164,10 +202,8 @@ const EditProduct = () => {
                             />
                         </div>
 
-                        {/* Image Upload Section */}
                         <div>
                             <label className="block text-sm text-zinc-400 mb-2">Product Image</label>
-
                             <div className="flex flex-col items-center justify-center border-2 border-dashed border-zinc-700 hover:border-violet-500 rounded-3xl p-8 transition-colors">
                                 <input
                                     type="file"
@@ -176,10 +212,7 @@ const EditProduct = () => {
                                     className="hidden"
                                     id="image-upload"
                                 />
-                                <label
-                                    htmlFor="image-upload"
-                                    className="cursor-pointer flex flex-col items-center"
-                                >
+                                <label htmlFor="image-upload" className="cursor-pointer flex flex-col items-center">
                                     {imagePreview ? (
                                         <img
                                             src={imagePreview}
@@ -187,24 +220,26 @@ const EditProduct = () => {
                                             className="w-48 h-48 object-cover rounded-2xl mb-4"
                                         />
                                     ) : (
-                                        <div className="w-20 h-20 bg-zinc-800 rounded-2xl flex items-center justify-center mb-4">
-                                            📷
-                                        </div>
+                                        <div className="w-20 h-20 bg-zinc-800 rounded-2xl flex items-center justify-center mb-4">📷</div>
                                     )}
                                     <span className="text-violet-400 font-medium">
-                                        {imagePreview ? "Change Image" : "Click to Upload Image"}
+                                        {imagePreview ? "Change Image" : "Click to Upload New Image"}
                                     </span>
-                                    <span className="text-xs text-zinc-500 mt-1">PNG, JPG, JPEG (Max 5MB)</span>
                                 </label>
                             </div>
+                            {existingImage && !imagePreview && (
+                                <p className="text-xs text-zinc-500 mt-2 text-center">
+                                    Current image will be kept if no new image is uploaded.
+                                </p>
+                            )}
                         </div>
 
                         <button
                             type="submit"
-                            disabled={isLoading}
+                            disabled={isSubmitting}
                             className="w-full bg-gradient-to-r from-violet-500 to-fuchsia-500 py-5 rounded-2xl font-semibold text-xl hover:brightness-110 transition-all active:scale-95 disabled:opacity-70"
                         >
-                            {isLoading ? "Updating Product..." : "Update Product"}
+                            {isSubmitting ? "Updating Product..." : "Update Product"}
                         </button>
                     </form>
                 </div>

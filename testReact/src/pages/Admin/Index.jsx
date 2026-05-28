@@ -7,11 +7,15 @@ const ProductList = () => {
     const [products, setProducts] = useState([])
 
     useEffect(() => {
+        fetchProducts();
+    }, []);
+
+    const fetchProducts = () => {
         axios.get(import.meta.env.VITE_API_URL + "/products")
             .then((res) => {
                 setProducts(res.data)
             })
-    }, [])
+    }
 
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedCategory, setSelectedCategory] = useState("All");
@@ -36,8 +40,17 @@ const ProductList = () => {
 
     const handleDelete = (id) => {
         if (window.confirm("Are you sure you want to delete this product?")) {
-            // setProducts(products.filter(p => p.id !== id)); // Uncomment when using state
-            console.log(`Deleted product with id: ${id}`);
+            axios.delete(import.meta.env.VITE_API_URL + "/products/" + id, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+            })
+                .then(() => {
+                    fetchProducts();
+                })
+                .catch((err) => {
+                    console.error(err);
+                });
         }
     };
 
@@ -125,9 +138,9 @@ const ProductList = () => {
                                 </div>
 
                                 <div className="flex gap-3">
-                                    <button className="flex-1 bg-zinc-800 hover:bg-zinc-700 border border-zinc-600 py-3 rounded-2xl text-sm font-medium transition-all">
+                                    <Link to={`/edit-product/${product._id}`} className="flex-1 bg-zinc-800 hover:bg-zinc-700 border border-zinc-600 py-3 rounded-2xl text-sm font-medium transition-all text-center">
                                         Edit
-                                    </button>
+                                    </Link>
                                     <button
                                         onClick={() => handleDelete(product._id)}
                                         className="flex-1 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 py-3 rounded-2xl text-sm font-medium transition-all"

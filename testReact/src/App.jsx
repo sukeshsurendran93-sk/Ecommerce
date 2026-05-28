@@ -7,6 +7,7 @@ import ProductDetails from "./pages/ProductDetails"
 import ProductListing from "./pages/Admin/Index"
 import { useSelector } from "react-redux"
 import AddProduct from "./pages/Admin/AddProduct"
+import EditProduct from "./pages/Admin/EditProduct"
 
 function App() {
   const { token, role } = useSelector((state) => state.auth)
@@ -19,6 +20,7 @@ function App() {
         <Route path="/products/:id" element={<ProductDetails />} />
         <Route path="/" element={token && role === "admin" ? <ProductListing /> : <Products />} />
         {role === "admin" && <Route path="/add-product" element={<AddProduct />} />}
+        {role === "admin" && <Route path="/edit-product/:id" element={<EditProduct />} />}
       </Routes>
     </div>
   )
