@@ -2,11 +2,13 @@ import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import api from "../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 const Orders = () => {
     const navigate = useNavigate();
     const [orders, setOrders] = useState([]);
     const [loading, setLoading] = useState(true);
+    const { role } = useSelector((state) => state.auth);
 
     const fetchOrders = async () => {
         try {
@@ -114,7 +116,7 @@ const Orders = () => {
                                     View Product
                                 </button>
 
-                                {order.status === "Pending" && (
+                                {order.status === "Pending" && role === 'user' && (
                                     <button className="text-red-400 hover:text-red-500 font-medium transition-colors">
                                         Cancel Order
                                     </button>

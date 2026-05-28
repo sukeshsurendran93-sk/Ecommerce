@@ -1,14 +1,14 @@
-import axios from "axios";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router-dom";
+import { getProduct, updateProduct } from "../../redux/thunks/productThunks";
 
 const EditProduct = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
-    const [product, setProduct] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [isSubmitting, setIsSubmitting] = useState(false);
+    const { product, loading, error } = useSelector((state) => state.product);
 
     const [formData, setFormData] = useState({
         name: "",
@@ -21,46 +21,31 @@ const EditProduct = () => {
 
     const [imagePreview, setImagePreview] = useState(null);
     const [existingImage, setExistingImage] = useState(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
-        const fetchProduct = async () => {
-            try {
-                const res = await axios.get(
-                    `${import.meta.env.VITE_API_URL}/products/${id}`,
-                    {
-                        headers: {
-                            Authorization: `Bearer ${localStorage.getItem("token")}`,
-                        },
-                    }
-                );
+        if (id) {
+            dispatch(getProduct(id));
+        }
+    }, [id, dispatch]);
 
-                if (res.data) {
-                    setProduct(res.data);
-                    setExistingImage(res.data.image);
+    useEffect(() => {
+        if (product) {
+            setExistingImage(product.image);
+            setFormData({
+                name: product.name || "",
+                price: product.price || "",
+                category: product.category || "",
+                stock: product.stock || "",
+                description: product.description || "",
+                image: null,
+            });
 
-                    setFormData({
-                        name: res.data.name || "",
-                        price: res.data.price || "",
-                        category: res.data.category || "",
-                        stock: res.data.stock || "",
-                        description: res.data.description || "",
-                        image: null,
-                    });
-
-                    if (res.data.image) {
-                        setImagePreview(`${import.meta.env.VITE_BASE_URL}${res.data.image}`);
-                    }
-                }
-            } catch (err) {
-                console.error("Failed to fetch product:", err);
-                alert("Failed to load product details");
-            } finally {
-                setLoading(false);
+            if (product.image) {
+                setImagePreview(`${import.meta.env.VITE_BASE_URL}${product.image}`);
             }
-        };
-
-        fetchProduct();
-    }, [id]);
+        }
+    }, [product]);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -75,7 +60,6 @@ const EditProduct = () => {
             alert("Please upload a valid image file");
             return;
         }
-
         if (file.size > 5 * 1024 * 1024) {
             alert("Image size should be less than 5MB");
             return;
@@ -93,36 +77,24 @@ const EditProduct = () => {
         setIsSubmitting(true);
 
         try {
-            const data = new FormData();
-
-            data.append("name", formData.name);
-            data.append("price", formData.price);
-            data.append("category", formData.category);
-            data.append("stock", formData.stock);
-            data.append("description", formData.description);
+            const formDataToSend = new FormData();
+            formDataToSend.append("name", formData.name);
+            formDataToSend.append("price", formData.price);
+            formDataToSend.append("category", formData.category);
+            formDataToSend.append("stock", formData.stock);
+            formDataToSend.append("description", formData.description);
 
             if (formData.image) {
-                data.append("image", formData.image);
+                formDataToSend.append("image", formData.image);
             }
 
-            const res = await axios.put(
-                `${import.meta.env.VITE_API_URL}/products/${id}`,
-                data,
-                {
-                    headers: {
-                        "Content-Type": "multipart/form-data",
-                        Authorization: `Bearer ${localStorage.getItem("token")}`,
-                    },
-                }
-            );
+            await dispatch(updateProduct({ id, product: formDataToSend })).unwrap();
 
-            if (res.status === 200) {
-                alert("Product updated successfully!");
-                navigate("/");
-            }
+            alert("Product updated successfully!");
+            navigate("/");
         } catch (err) {
             console.error(err);
-            alert(err.response?.data?.message || "Failed to update product");
+            alert(err?.message || "Failed to update product");
         } finally {
             setIsSubmitting(false);
         }
@@ -132,13 +104,15 @@ const EditProduct = () => {
         return <div className="p-8 text-center text-xl">Loading product details...</div>;
     }
 
+    if (error) {
+        return <div className="p-8 text-center text-red-500">Error: {error}</div>;
+    }
+
     return (
         <div className="p-8">
             <div className="max-w-7xl mx-auto">
                 <div className="bg-zinc-900 border border-zinc-700 rounded-3xl shadow-2xl p-10">
-                    <h2 className="text-4xl font-bold text-center mb-8 text-white">
-                        Edit Product
-                    </h2>
+                    <h2 className="text-4xl font-bold text-center mb-8 text-white">Edit Product</h2>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -214,11 +188,7 @@ const EditProduct = () => {
                                 />
                                 <label htmlFor="image-upload" className="cursor-pointer flex flex-col items-center">
                                     {imagePreview ? (
-                                        <img
-                                            src={imagePreview}
-                                            alt="Preview"
-                                            className="w-48 h-48 object-cover rounded-2xl mb-4"
-                                        />
+                                        <img src={imagePreview} alt="Preview" className="w-48 h-48 object-cover rounded-2xl mb-4" />
                                     ) : (
                                         <div className="w-20 h-20 bg-zinc-800 rounded-2xl flex items-center justify-center mb-4">📷</div>
                                     )}

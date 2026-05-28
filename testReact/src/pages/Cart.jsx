@@ -1,50 +1,32 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { getCartItems, removeFromCart } from "../redux/thunks/cartThunks";
 import { Link } from "react-router-dom";
-import api from "../api/axiosInstance";
 
 const Cart = () => {
-    const [cartItems, setCartItems] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [total, setTotal] = useState(0);
+    const dispatch = useDispatch();
+    const { items, loading, error } = useSelector((state) => state.cart);
 
     // Fetch Cart Items
-    const fetchCart = async () => {
-        try {
-            setLoading(true);
-            const res = await api.get("/cart");
-            setCartItems(res.data);
-
-            // Calculate Total
-            const sum = res.data.reduce((acc, item) => {
-                return acc + (item.price * (item.quantity || 1));
-            }, 0);
-            setTotal(sum);
-        } catch (error) {
-            console.error("Failed to fetch cart:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
     useEffect(() => {
-        fetchCart();
-    }, []);
+        dispatch(getCartItems());
+    }, [dispatch]);
+
 
     // Remove Item from Cart
-    const removeFromCart = async (productId) => {
-        console.log(productId);
-
+    const handleRemoveFromCart = (productId) => {
         if (!window.confirm("Remove this item from cart?")) return;
-
         try {
-            await api.delete(`/cart/${productId}`);
-            fetchCart();
+            dispatch(removeFromCart(productId));
+            dispatch(getCartItems());
         } catch (error) {
             console.error("Failed to remove item:", error);
             alert("Failed to remove item");
         }
     };
 
+    console.log(items);
+    
     if (loading) {
         return <div className="text-center py-20 text-xl text-zinc-400">Loading your cart...</div>;
     }
@@ -53,17 +35,17 @@ const Cart = () => {
         <div className="max-w-9xl mx-auto px-6 py-10">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
                 <h2 className="text-3xl sm:text-4xl font-bold text-white">Your Cart</h2>
-                {cartItems.length > 0 && (<p className="text-xl text-zinc-400">Total: <span className="text-white font-semibold">₹{total}</span></p>)}
+                {items.length > 0 && (<p className="text-xl text-zinc-400">Total: <span className="text-white font-semibold">₹{total}</span></p>)}
             </div>
 
-            {cartItems.length === 0 ? (
+            {items.length === 0 ? (
                 <div className="text-center py-20">
                     <p className="text-2xl text-zinc-500 mb-4">Your cart is empty</p>
                     <Link to="/" className="inline-block bg-violet-600 hover:bg-violet-700 px-8 py-4 rounded-2xl font-semibold text-lg transition-all">Browse Products</Link>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {cartItems.map((item) => (
+                    {items.map((item) => (
                         <div key={item.productID} className="bg-zinc-900 border border-zinc-700 rounded-3xl overflow-hidden hover:border-violet-500 transition-all duration-300 group">
                             <div className="relative h-56 overflow-hidden">
                                 <img src={import.meta.env.VITE_BASE_URL + item.image} alt={item.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
@@ -78,7 +60,7 @@ const Cart = () => {
                                     <Link to={`/buy-now/${item.productID}`} className="flex-1 bg-zinc-800 hover:bg-zinc-700 border border-zinc-600 py-3 rounded-2xl text-sm font-medium transition-all text-center">
                                         Buy Now
                                     </Link>
-                                    <button onClick={() => removeFromCart(item.productID)} className="flex-1 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 py-3 rounded-2xl text-sm font-medium transition-all">
+                                    <button onClick={() => handleRemoveFromCart(item.productID)} className="flex-1 bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 py-3 rounded-2xl text-sm font-medium transition-all">
                                         Remove
                                     </button>
                                 </div>

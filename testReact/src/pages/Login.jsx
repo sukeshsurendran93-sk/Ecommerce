@@ -5,12 +5,10 @@ import { login } from "../redux/thunks/authThunk";
 
 const Login = () => {
   const { role, token, error, isLoading } = useSelector((state) => state.auth);
-
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
+  const [formData, setFormData] = useState({ email: "", password: "" });
 
   useEffect(() => {
     if (token) {
@@ -18,9 +16,9 @@ const Login = () => {
     }
   }, [token, navigate]);
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    dispatch(login({ email, password }));
+    dispatch(login(formData));
   };
 
   return (
@@ -35,50 +33,52 @@ const Login = () => {
 
           <h2 className="text-4xl font-bold text-center mb-2">Login</h2>
           {error && <div className="text-center text-red-500">{error}</div>}
-          <div className="space-y-6">
-            <div>
-              <label className="block text-sm text-zinc-400 mb-2">
-                Email Address
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                className="w-full bg-zinc-800 border border-zinc-700 focus:border-violet-500 rounded-2xl px-6 py-4 outline-none text-lg"
-              />
-            </div>
+          <form onSubmit={handleSubmit}>
+            <div className="space-y-6">
+              <div>
+                <label className="block text-sm text-zinc-400 mb-2">
+                  Email Address
+                </label>
+                <input
+                  type="email"
+                  value={formData.email}
+                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  placeholder="you@example.com"
+                  className="w-full bg-zinc-800 border border-zinc-700 focus:border-violet-500 rounded-2xl px-6 py-4 outline-none text-lg"
+                />
+              </div>
 
-            <div>
-              <label className="block text-sm text-zinc-400 mb-2">
-                Password
-              </label>
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full bg-zinc-800 border border-zinc-700 focus:border-violet-500 rounded-2xl px-6 py-4 outline-none text-lg"
-              />
-            </div>
+              <div>
+                <label className="block text-sm text-zinc-400 mb-2">
+                  Password
+                </label>
+                <input
+                  type="password"
+                  value={formData.password}
+                  onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                  placeholder="••••••••"
+                  className="w-full bg-zinc-800 border border-zinc-700 focus:border-violet-500 rounded-2xl px-6 py-4 outline-none text-lg"
+                />
+              </div>
 
-            <button
-              onClick={handleSubmit}
-              className="w-full bg-gradient-to-r from-violet-500 to-fuchsia-500 py-5 rounded-2xl font-semibold text-xl hover:brightness-110 transition-all active:scale-95"
-            >
-              Sign In
-            </button>
-
-            <div className="text-center text-zinc-400">
-              Don't have an account?
-              <Link
-                to="/register"
-                className="text-violet-400 font-medium hover:underline"
+              <button
+                type="submit"
+                className="w-full bg-gradient-to-r from-violet-500 to-fuchsia-500 py-5 rounded-2xl font-semibold text-xl hover:brightness-110 transition-all active:scale-95"
               >
-                Register
-              </Link>
+                Sign In
+              </button>
+
+              <div className="text-center text-zinc-400">
+                Don't have an account?
+                <Link
+                  to="/register"
+                  className="text-violet-400 font-medium hover:underline"
+                >
+                  Register
+                </Link>
+              </div>
             </div>
-          </div>
+          </form>
         </div>
       </div>
     </div>

@@ -1,19 +1,19 @@
 import axios from "axios";
 import { useState, useMemo, useEffect } from "react";
 import { Link } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { deleteProduct, getProducts } from "../../redux/thunks/productThunks";
 
 const ProductList = () => {
-    const [products, setProducts] = useState([])
+    const dispatch = useDispatch();
+    const { products, loading, error } = useSelector((state) => state.product)
 
     useEffect(() => {
         fetchProducts();
     }, []);
 
     const fetchProducts = () => {
-        axios.get(import.meta.env.VITE_API_URL + "/products")
-            .then((res) => {
-                setProducts(res.data)
-            })
+        dispatch(getProducts());
     }
 
     const [searchTerm, setSearchTerm] = useState("");
@@ -36,17 +36,8 @@ const ProductList = () => {
 
     const handleDelete = (id) => {
         if (window.confirm("Are you sure you want to delete this product?")) {
-            axios.delete(import.meta.env.VITE_API_URL + "/products/" + id, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem("token")}`,
-                },
-            })
-                .then(() => {
-                    fetchProducts();
-                })
-                .catch((err) => {
-                    console.error(err);
-                });
+            dispatch(deleteProduct(id));
+            fetchProducts();
         }
     };
 

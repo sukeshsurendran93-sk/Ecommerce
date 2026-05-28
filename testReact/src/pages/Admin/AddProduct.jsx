@@ -2,7 +2,7 @@ import axios from "axios";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
-// import { addProduct } from "../redux/thunks/productThunk";
+import { createProduct } from "../../redux/thunks/productThunks";
 
 const AddProduct = () => {
     const dispatch = useDispatch();
@@ -14,7 +14,7 @@ const AddProduct = () => {
         category: "",
         stock: "",
         description: "",
-        image: null,           
+        image: null,
     });
 
     const [imagePreview, setImagePreview] = useState(null);
@@ -29,13 +29,11 @@ const AddProduct = () => {
         const file = e.target.files[0];
 
         if (file) {
-            // Validate file type
             if (!file.type.startsWith("image/")) {
                 alert("Please upload a valid image file");
                 return;
             }
 
-            // Validate file size (max 5MB)
             if (file.size > 5 * 1024 * 1024) {
                 alert("Image size should be less than 5MB");
                 return;
@@ -43,7 +41,6 @@ const AddProduct = () => {
 
             setFormData({ ...formData, image: file });
 
-            // Create preview
             const reader = new FileReader();
             reader.onloadend = () => {
                 setImagePreview(reader.result);
@@ -62,27 +59,16 @@ const AddProduct = () => {
 
         setIsLoading(true);
 
-        api.post("/products", formData, {
-            headers: {
-                "Content-Type": "multipart/form-data",
-            },
-        })
-            .then((res) => {
-                if (res.status === 201) {
-                    alert("Product added successfully!");
-                    navigate('/')
-                } else {
-                    alert("Failed to add product");
-                }
-
+        dispatch(createProduct(formData)).unwrap()
+            .then(() => {
+                alert("Product added successfully!");
+                navigate('/')
             })
             .catch((err) => {
-                console.log(err)
-            });
-        // dispatch(addProduct(formData)); // Redux dispatch (FormData recommended for files)
-
-
-        // Reset form
+                alert("Failed to add product");
+            }).finally(() => {
+                setIsLoading(false);
+            })
         setFormData({
             name: "",
             price: "",

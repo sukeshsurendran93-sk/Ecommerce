@@ -1,12 +1,13 @@
 import { useNavigate, useParams } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import api from "../api/axiosInstance";
+import { getProduct } from "../redux/thunks/productThunks";
+import { useDispatch, useSelector } from "react-redux";
 
 const ProductDetails = () => {
     const { id } = useParams();
-    const [product, setProduct] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
+    const { product, loading, error } = useSelector((state) => state.product)
+    const dispatch = useDispatch();
     const navigate = useNavigate()
 
     const handleAddToCart = () => {
@@ -18,18 +19,37 @@ const ProductDetails = () => {
     }
 
     useEffect(() => {
-        api.get(`/products/${id}`).then(response => {
-            setProduct(response.data);
-            setLoading(false);
-        }).catch(error => {
-            setError(error);
-            setLoading(false);
-        })
+        dispatch(getProduct(id));
     }, [id]);
 
-    if (loading) return <div>Loading...</div>;
-    if (error) return <div>Error: {error.message}</div>;
-    if (!product) return <div>Product not found</div>;
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-violet-600"></div>
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <div className="text-center">
+                    <h1 className="text-4xl font-bold text-red-500">Error</h1>
+                    <p className="text-xl text-zinc-400 mt-2">{error}</p>
+                </div>
+            </div>
+        );
+    }
+    if (!product) {
+        return (
+            <div className="flex justify-center items-center h-screen">
+                <div className="text-center">
+                    <h1 className="text-4xl font-bold text-red-500">Product not found</h1>
+                    <button onClick={() => navigate(-1)} className="mt-4 text-violet-500 hover:text-violet-400 transition-colors">Go Back</button>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="max-w-7xl mx-auto px-6 py-10">

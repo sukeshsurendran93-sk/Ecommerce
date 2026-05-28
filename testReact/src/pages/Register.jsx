@@ -6,10 +6,7 @@ import { register } from "../redux/thunks/authThunk";
 const Register = () => {
     const { role, token, error, isLoading } = useSelector((state) => state.auth);
 
-    const [name, setName] = useState("");
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
-    const [confirmPassword, setConfirmPassword] = useState("");
+    const [formData, setFormData] = useState({ name: "", email: "", password: "", confirmPassword: "" });
     const Navigate = useNavigate();
     const dispatch = useDispatch();
 
@@ -22,16 +19,16 @@ const Register = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (password !== confirmPassword) {
+        if (formData.password !== formData.confirmPassword) {
             setError("Passwords do not match");
             return;
         }
-        if (!name || !email || !password) {
+        if (!formData.name || !formData.email || !formData.password) {
             setError("Please fill all the fields");
             return;
         }
 
-        dispatch(register({ name, email, password }));
+        dispatch(register(formData));
     };
 
     return (
@@ -62,8 +59,8 @@ const Register = () => {
                                 </label>
                                 <input
                                     type="text"
-                                    value={name}
-                                    onChange={(e) => setName(e.target.value)}
+                                    value={formData.name}
+                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                                     placeholder="John Doe"
                                     className="w-full bg-zinc-800 border border-zinc-700 focus:border-violet-500 rounded-2xl px-6 py-4 outline-none text-lg transition-all"
                                     required
@@ -76,8 +73,8 @@ const Register = () => {
                                 </label>
                                 <input
                                     type="email"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
+                                    value={formData.email}
+                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
                                     placeholder="you@example.com"
                                     className="w-full bg-zinc-800 border border-zinc-700 focus:border-violet-500 rounded-2xl px-6 py-4 outline-none text-lg transition-all"
                                     required
@@ -92,8 +89,8 @@ const Register = () => {
                                 </label>
                                 <input
                                     type="password"
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
+                                    value={formData.password}
+                                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                                     placeholder="••••••••"
                                     className="w-full bg-zinc-800 border border-zinc-700 focus:border-violet-500 rounded-2xl px-6 py-4 outline-none text-lg transition-all"
                                     required
@@ -106,8 +103,8 @@ const Register = () => {
                                 </label>
                                 <input
                                     type="password"
-                                    value={confirmPassword}
-                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    value={formData.confirmPassword}
+                                    onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
                                     placeholder="••••••••"
                                     className="w-full bg-zinc-800 border border-zinc-700 focus:border-violet-500 rounded-2xl px-6 py-4 outline-none text-lg transition-all"
                                     required
