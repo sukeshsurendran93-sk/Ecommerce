@@ -4,7 +4,7 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 // import { addProduct } from "../redux/thunks/productThunk";
 
-const AddProduct = () => {
+const EditProduct = () => {
     const dispatch = useDispatch();
     const navigate = useNavigate();
 
@@ -204,7 +204,7 @@ const AddProduct = () => {
                             disabled={isLoading}
                             className="w-full bg-gradient-to-r from-violet-500 to-fuchsia-500 py-5 rounded-2xl font-semibold text-xl hover:brightness-110 transition-all active:scale-95 disabled:opacity-70"
                         >
-                            {isLoading ? "Adding Product..." : "Add Product"}
+                            {isLoading ? "Updating Product..." : "Update Product"}
                         </button>
                     </form>
                 </div>
@@ -213,4 +213,4 @@ const AddProduct = () => {
     );
 };
 
-export default AddProduct;
+export default EditProduct;

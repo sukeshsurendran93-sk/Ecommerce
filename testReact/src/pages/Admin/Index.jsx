@@ -7,9 +7,8 @@ const ProductList = () => {
     const [products, setProducts] = useState([])
 
     useEffect(() => {
-        axios.get("http://localhost:5000/api/products")
+        axios.get(import.meta.env.VITE_API_URL + "/products")
             .then((res) => {
-                console.log(res.data)
                 setProducts(res.data)
             })
     }, [])
@@ -101,7 +100,7 @@ const ProductList = () => {
                         >
                             <div className="relative h-56 overflow-hidden">
                                 <img
-                                    src={product.image}
+                                    src={import.meta.env.VITE_BASE_URL + product.image}
                                     alt={product.name}
                                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                 />

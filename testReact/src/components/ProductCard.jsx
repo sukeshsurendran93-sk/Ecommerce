@@ -4,7 +4,7 @@ const ProductCard = ({ product }) => {
     return (
         <div className="card-hover bg-zinc-900 border border-zinc-700 rounded-3xl overflow-hidden group">
             <div className="relative">
-                <img src={product.image} alt="Product" className="w-full h-72 object-cover transition-transform duration-700 group-hover:scale-110" />
+                <img src={import.meta.env.VITE_BASE_URL + product.image} alt="Product" className="w-full h-72 object-cover transition-transform duration-700 group-hover:scale-110" />
             </div>
             <div className="p-6">
                 <div className="flex justify-between items-start">
@@ -17,7 +17,7 @@ const ProductCard = ({ product }) => {
                     </div>
                 </div>
                 <Link
-                    to={`/products/${product.id}`}
+                    to={`/products/${product._id}`}
                     className="mt-6 w-full bg-gradient-to-r from-violet-500 to-fuchsia-500 py-4 rounded-3xl font-semibold hover:brightness-110 transition-all active:scale-95 inline-block text-center"
                 >
                     View Product

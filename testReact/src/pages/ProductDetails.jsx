@@ -13,7 +13,7 @@ const ProductDetails = () => {
     }
 
     useEffect(() => {
-        fetch(`https://dummyjson.com/products/${id}`)
+        fetch(import.meta.env.VITE_API_URL + `/products/${id}`)
             .then(response => response.json())
             .then(data => {
                 setProduct(data);
@@ -37,14 +37,13 @@ const ProductDetails = () => {
                         <button onClick={() => window.history.back()} className="mb-4 bg-zinc-800 border border-zinc-700 rounded-2xl px-6 py-4 outline-none text-lg">Back</button>
                     </div>
                     <div className="md:w-1/2">
-                        <img src={product.thumbnail} alt={product.title} className="w-full rounded-2xl" />
+                        <img src={import.meta.env.VITE_BASE_URL + product.image} alt={product.name} className="w-full rounded-2xl" />
                     </div>
                     <div className="md:w-1/2">
-                        <h1 className="text-4xl font-bold text-white mb-4">{product.title}</h1>
+                        <h1 className="text-4xl font-bold text-white mb-4">{product.name}</h1>
                         <p className="text-zinc-400 text-lg mb-4">{product.description}</p>
                         <div className="flex items-center gap-4 mb-4">
                             <span className="text-2xl font-bold text-emerald-400">${product.price}</span>
-                            <span className="text-zinc-400">({product.discountPercentage}% off)</span>
                         </div>
                         {
                             localStorage.getItem("token") ? (
