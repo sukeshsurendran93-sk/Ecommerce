@@ -14,7 +14,7 @@ const AddProduct = () => {
         category: "",
         stock: "",
         description: "",
-        image: null,           // Will store File object
+        image: null,           
     });
 
     const [imagePreview, setImagePreview] = useState(null);
@@ -62,10 +62,9 @@ const AddProduct = () => {
 
         setIsLoading(true);
 
-        axios.post(import.meta.env.VITE_API_URL + "/products", formData, {
+        api.post("/products", formData, {
             headers: {
                 "Content-Type": "multipart/form-data",
-                Authorization: `Bearer ${localStorage.getItem("token")}`,
             },
         })
             .then((res) => {

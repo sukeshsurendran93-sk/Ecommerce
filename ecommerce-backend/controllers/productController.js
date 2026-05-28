@@ -1,5 +1,15 @@
 import Product from "../models/product.js";
 
+const getCategories = async (req, res) => {
+  try {
+    const categories = await Product.distinct("category");
+    res.status(200).json(categories);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Server Error" });
+  }
+};
+
 const getProducts = async (req, res) => {
   try {
     const query = {};
@@ -75,4 +85,5 @@ export {
   createProduct,
   updateProduct,
   deleteProduct,
+  getCategories
 };

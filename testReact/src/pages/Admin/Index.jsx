@@ -3,7 +3,6 @@ import { useState, useMemo, useEffect } from "react";
 import { Link } from "react-router-dom";
 
 const ProductList = () => {
-    // Sample Data - Replace with Redux/API later
     const [products, setProducts] = useState([])
 
     useEffect(() => {
@@ -21,22 +20,19 @@ const ProductList = () => {
     const [selectedCategory, setSelectedCategory] = useState("All");
     const [stockFilter, setStockFilter] = useState("All");
 
-    // Get unique categories
-    // const categories = ["All", ...new Set(products.map(p => p.category))];
+    const categories = ["All", ...new Set(products.map(p => p.category))];
+    const filteredProducts = useMemo(() => {
+        return products.filter(product => {
+            const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
+            const matchesCategory = selectedCategory === "All" || product.category === selectedCategory;
+            const matchesStock =
+                stockFilter === "All" ||
+                (stockFilter === "In Stock" && product.stock > 20) ||
+                (stockFilter === "Low Stock" && product.stock <= 20);
 
-    // // Filtered & Searched Products
-    // const filteredProducts = useMemo(() => {
-    //     return products.filter(product => {
-    //         const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase());
-    //         const matchesCategory = selectedCategory === "All" || product.category === selectedCategory;
-    //         const matchesStock =
-    //             stockFilter === "All" ||
-    //             (stockFilter === "In Stock" && product.stock > 20) ||
-    //             (stockFilter === "Low Stock" && product.stock <= 20);
-
-    //         return matchesSearch && matchesCategory && matchesStock;
-    //     });
-    // }, [searchTerm, selectedCategory, stockFilter, products]);
+            return matchesSearch && matchesCategory && matchesStock;
+        });
+    }, [searchTerm, selectedCategory, stockFilter, products]);
 
     const handleDelete = (id) => {
         if (window.confirm("Are you sure you want to delete this product?")) {
@@ -55,58 +51,51 @@ const ProductList = () => {
     };
 
     return (
-        <div className="max-w-9xl mx-auto px-6 pt-10">
+        <div className="max-w-9xl mx-auto px-6 pt-5">
             <div className="p-8">
-                <div className="flex justify-between items-center mb-8">
-                    <h2 className="text-4xl font-bold text-white">All Products</h2>
-                    <Link to="/add-product" className="bg-gradient-to-r from-violet-500 to-fuchsia-500 px-6 py-3 rounded-2xl font-semibold hover:brightness-110 transition-all flex items-center gap-2">
-                        + Add New Product
-                    </Link>
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+                    <h2 className="text-3xl sm:text-4xl font-bold text-white">All Products</h2>
+                    <Link to="/add-product" className="bg-gradient-to-r from-violet-500 to-fuchsia-500 px-6 py-3 rounded-2xl font-semibold hover:brightness-110 transition-all flex items-center justify-center gap-2 whitespace-nowrap">+ Add New Product</Link>
                 </div>
-
-                {/* Search & Filter Bar */}
-                <div className="bg-zinc-900 border border-zinc-700 rounded-3xl p-6 mb-8 flex flex-wrap gap-4 items-center">
-                    {/* Search Input */}
-                    <div className="flex-1 min-w-[250px]">
-                        <input
-                            type="text"
-                            placeholder="Search products..."
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full bg-zinc-800 border border-zinc-700 focus:border-violet-500 rounded-2xl px-6 py-4 outline-none text-lg"
-                        />
-                    </div>
-
-                    {/* Category Filter */}
-                    <div className="min-w-[180px]">
-                        <select
-                            value={selectedCategory}
-                            onChange={(e) => setSelectedCategory(e.target.value)}
-                            className="w-full bg-zinc-800 border border-zinc-700 focus:border-violet-500 rounded-2xl px-6 py-4 outline-none text-lg"
-                        >
-                            {/* {categories.map(cat => (
-                                <option key={cat} value={cat}>{cat}</option>
-                            ))} */}
-                        </select>
-                    </div>
-
-                    {/* Stock Filter */}
-                    <div className="min-w-[180px]">
-                        <select
-                            value={stockFilter}
-                            onChange={(e) => setStockFilter(e.target.value)}
-                            className="w-full bg-zinc-800 border border-zinc-700 focus:border-violet-500 rounded-2xl px-6 py-4 outline-none text-lg"
-                        >
-                            <option value="All">All Stock</option>
-                            <option value="In Stock">In Stock (20+)</option>
-                            <option value="Low Stock">Low Stock (≤20)</option>
-                        </select>
+                <div className="bg-zinc-900 border border-zinc-700 rounded-3xl p-6 mb-8">
+                    <div className="flex flex-col md:flex-row gap-4">
+                        <div className="flex-1">
+                            <input
+                                type="text"
+                                placeholder="Search products..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full bg-zinc-800 border border-zinc-700 focus:border-violet-500 rounded-2xl px-6 py-4 outline-none text-lg"
+                            />
+                        </div>
+                        <div className="flex flex-col sm:flex-row gap-4">
+                            <div className="w-full sm:w-48">
+                                <select
+                                    value={selectedCategory}
+                                    onChange={(e) => setSelectedCategory(e.target.value)}
+                                    className="w-full bg-zinc-800 border border-zinc-700 focus:border-violet-500 rounded-2xl px-6 py-4 outline-none text-lg"
+                                >
+                                    {categories.map(cat => (
+                                        <option key={cat} value={cat}>{cat}</option>
+                                    ))}
+                                </select>
+                            </div>
+                            <div className="w-full sm:w-48">
+                                <select
+                                    value={stockFilter}
+                                    onChange={(e) => setStockFilter(e.target.value)}
+                                    className="w-full bg-zinc-800 border border-zinc-700 focus:border-violet-500 rounded-2xl px-6 py-4 outline-none text-lg"
+                                >
+                                    <option value="All">All Stock</option>
+                                    <option value="In Stock">In Stock (20+)</option>
+                                    <option value="Low Stock">Low Stock (≤20)</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
                 </div>
-
-                {/* Products Grid */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {products.map((product) => (
+                    {filteredProducts.map((product) => (
                         <div
                             key={product._id}
                             className="bg-zinc-900 border border-zinc-700 rounded-3xl overflow-hidden hover:border-violet-500 transition-all duration-300 group"
@@ -152,12 +141,11 @@ const ProductList = () => {
                         </div>
                     ))}
                 </div>
-
-                {/* {filteredProducts.length === 0 && (
+                {filteredProducts.length === 0 && (
                     <div className="text-center py-20 text-zinc-500 text-xl">
-                        No products found matching your criteria.
+                        No Products Found!
                     </div>
-                )} */}
+                )}
             </div>
         </div>
     );

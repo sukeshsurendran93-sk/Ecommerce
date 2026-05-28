@@ -4,6 +4,7 @@ import dbConnection from "./config/dbConnection.js";
 import userRoutes from "./routes/authenticationRoutes.js";
 import productRoutes from "./routes/productRoutes.js";
 import orderRoutes from "./routes/orderRoutes.js";
+import cartRoutes from "./routes/cartRoutes.js";
 import analyticsRoutes from "./routes/analyticsRoutes.js";
 import userProfileRoutes from "./routes/userProfileRoutes.js";
 import { notFound, errorHandler } from "./middleware/errorHandler.js";
@@ -28,6 +29,7 @@ app.get("/", (req, res) => {
 app.use("/api/users", userRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/orders", orderRoutes);
+app.use("/api/cart", cartRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/profile", userProfileRoutes);
 app.use(notFound);

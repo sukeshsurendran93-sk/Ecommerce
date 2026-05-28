@@ -8,6 +8,8 @@ import ProductListing from "./pages/Admin/Index"
 import { useSelector } from "react-redux"
 import AddProduct from "./pages/Admin/AddProduct"
 import EditProduct from "./pages/Admin/EditProduct"
+import Cart from "./pages/Cart"
+import BuyNow from "./pages/BuyNow"
 
 function App() {
   const { token, role } = useSelector((state) => state.auth)
@@ -21,6 +23,8 @@ function App() {
         <Route path="/" element={token && role === "admin" ? <ProductListing /> : <Products />} />
         {role === "admin" && <Route path="/add-product" element={<AddProduct />} />}
         {role === "admin" && <Route path="/edit-product/:id" element={<EditProduct />} />}
+        {token && <Route path="/cart" element={<Cart />} />}
+        {token && <Route path="/buy-now/:productId" element={<BuyNow />} />}
       </Routes>
     </div>
   )

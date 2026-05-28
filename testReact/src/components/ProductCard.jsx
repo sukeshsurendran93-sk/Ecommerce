@@ -13,7 +13,7 @@ const ProductCard = ({ product }) => {
                         <p className="text-zinc-400 text-sm">{product.category}</p>
                     </div>
                     <div className="text-right">
-                        <h4 className="text-2xl font-bold text-emerald-400">${product.price}</h4>
+                        <h4 className="text-2xl font-bold text-emerald-400">₹{product.price}</h4>
                     </div>
                 </div>
                 <Link

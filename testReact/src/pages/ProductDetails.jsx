@@ -1,5 +1,6 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
+import api from "../api/axiosInstance";
 
 const ProductDetails = () => {
     const { id } = useParams();
@@ -8,21 +9,22 @@ const ProductDetails = () => {
     const [error, setError] = useState(null);
     const navigate = useNavigate()
 
-    const goToLogin = () => {
-        navigate('/login')
+    const handleAddToCart = () => {
+        api.post("/cart", { productId: id }).then(response => {
+            console.log(response.data);
+        }).catch(error => {
+            console.log(error.response.data.message);
+        })
     }
 
     useEffect(() => {
-        fetch(import.meta.env.VITE_API_URL + `/products/${id}`)
-            .then(response => response.json())
-            .then(data => {
-                setProduct(data);
-                setLoading(false);
-            })
-            .catch(error => {
-                setError(error);
-                setLoading(false);
-            });
+        api.get(`/products/${id}`).then(response => {
+            setProduct(response.data);
+            setLoading(false);
+        }).catch(error => {
+            setError(error);
+            setLoading(false);
+        })
     }, [id]);
 
     if (loading) return <div>Loading...</div>;
@@ -31,31 +33,72 @@ const ProductDetails = () => {
 
     return (
         <div className="max-w-7xl mx-auto px-6 py-10">
-            <div className="bg-zinc-900 border border-zinc-700 rounded-3xl shadow-2xl p-10">
-                <div className="flex flex-col md:flex-row gap-8">
-                    <div>
-                        <button onClick={() => window.history.back()} className="mb-4 bg-zinc-800 border border-zinc-700 rounded-2xl px-6 py-4 outline-none text-lg">Back</button>
-                    </div>
-                    <div className="md:w-1/2">
-                        <img src={import.meta.env.VITE_BASE_URL + product.image} alt={product.name} className="w-full rounded-2xl" />
-                    </div>
-                    <div className="md:w-1/2">
-                        <h1 className="text-4xl font-bold text-white mb-4">{product.name}</h1>
-                        <p className="text-zinc-400 text-lg mb-4">{product.description}</p>
-                        <div className="flex items-center gap-4 mb-4">
-                            <span className="text-2xl font-bold text-emerald-400">${product.price}</span>
+            <div className="bg-zinc-900 border border-zinc-700 rounded-3xl shadow-2xl overflow-hidden">
+                {/* Back Button */}
+                <div className="p-6 border-b border-zinc-800">
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="flex items-center gap-2 text-zinc-400 hover:text-white transition-colors text-lg"
+                    >
+                        ← Back to Products
+                    </button>
+                </div>
+
+                <div className="flex flex-col lg:flex-row">
+                    {/* Image Section */}
+                    <div className="lg:w-1/2 bg-black p-8 flex items-center justify-center">
+                        <div className="relative">
+                            <img
+                                src={import.meta.env.VITE_BASE_URL + product.image}
+                                alt={product.name}
+                                className="w-full max-h-[520px] object-contain rounded-3xl shadow-2xl"
+                            />
+                            {product.stock > 0 && (
+                                <div className="absolute top-6 right-6 bg-green-500 text-black text-sm font-bold px-5 py-2 rounded-2xl">
+                                    IN STOCK
+                                </div>
+                            )}
                         </div>
-                        {
-                            localStorage.getItem("token") ? (
-                                <button className="w-full bg-gradient-to-r from-violet-500 to-fuchsia-500 py-4 rounded-3xl font-semibold hover:brightness-110 transition-all active:scale-95">
+                    </div>
+
+                    {/* Details Section */}
+                    <div className="lg:w-1/2 p-10 lg:p-12 flex flex-col">
+                        <div className="text-sm uppercase tracking-widest text-violet-400 mb-2">
+                            {product.category}
+                        </div>
+
+                        <h1 className="text-4xl lg:text-5xl font-bold text-white leading-tight mb-6">
+                            {product.name}
+                        </h1>
+
+                        <div className="flex items-center gap-4 mb-8">
+                            <span className="text-4xl font-bold text-white">
+                                ₹{product.price}
+                            </span>
+                            {product.stock < 10 && product.stock > 0 && (
+                                <span className="text-orange-400 text-sm font-medium">
+                                    Only {product.stock} left!
+                                </span>
+                            )}
+                        </div>
+
+                        <p className="text-zinc-400 text-lg leading-relaxed mb-10">
+                            {product.description}
+                        </p>
+
+                        {/* Action Area */}
+                        <div className="mt-auto">
+                            {localStorage.getItem("token") ? (
+                                <button onClick={handleAddToCart} className="w-full bg-gradient-to-r from-violet-500 to-fuchsia-500 py-5 rounded-3xl font-semibold text-xl hover:brightness-110 active:scale-95 transition-all duration-200 shadow-lg shadow-violet-500/30">
                                     Add to Cart
                                 </button>
                             ) : (
-                                <button onClick={goToLogin} className="w-full bg-gradient-to-r from-violet-500 to-fuchsia-500 py-4 rounded-3xl font-semibold hover:brightness-110 transition-all active:scale-95">
-                                    Login to add to Cart
+                                <button onClick={() => navigate('/login')} className="w-full bg-gradient-to-r from-violet-500 to-fuchsia-500 py-5 rounded-3xl font-semibold text-xl hover:brightness-110 active:scale-95 transition-all duration-200">
+                                    Login
                                 </button>
-                            )
-                        }
+                            )}
+
+                        </div>
                     </div>
                 </div>
             </div>
