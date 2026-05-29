@@ -3,21 +3,20 @@ import { Link } from "react-router-dom";
 import api from "../api/axiosInstance";
 import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
+import { allorders, myOrders } from "../redux/thunks/orderThunks";
 
 const Orders = () => {
     const navigate = useNavigate();
-    const [orders, setOrders] = useState([]);
-    const [loading, setLoading] = useState(true);
+    const dispatch = useDispatch();
+    const { orders, loading } = useSelector((state) => state.order);
     const { role } = useSelector((state) => state.auth);
 
     const fetchOrders = async () => {
-        try {
-            const res = await api.get("/orders/myorders");
-            setOrders(res.data);
-        } catch (error) {
-            console.error("Failed to fetch orders:", error);
-        } finally {
-            setLoading(false);
+        if (role === 'user') {
+            dispatch(myOrders());
+        } else {
+            dispatch(allorders());
         }
     };
 
@@ -40,7 +39,7 @@ const Orders = () => {
 
     return (
         <div className="max-w-9xl mx-auto px-6 py-10">
-            <h1 className="text-4xl font-bold text-white mb-10">My Orders</h1>
+            <h1 className="text-4xl font-bold text-white mb-10">Orders</h1>
 
             {orders.length === 0 ? (
                 <div className="text-center py-20 bg-zinc-900 border border-zinc-700 rounded-3xl">

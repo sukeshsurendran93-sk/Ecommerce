@@ -1,8 +1,8 @@
 import { useNavigate, useParams } from "react-router-dom";
 import { useEffect } from "react";
-import api from "../api/axiosInstance";
 import { getProduct } from "../redux/thunks/productThunks";
 import { useDispatch, useSelector } from "react-redux";
+import { addToCart } from "../redux/thunks/cartThunks";
 
 const ProductDetails = () => {
     const { id } = useParams();
@@ -11,11 +11,8 @@ const ProductDetails = () => {
     const navigate = useNavigate()
 
     const handleAddToCart = () => {
-        api.post("/cart", { productId: id }).then(response => {
-            console.log(response.data);
-        }).catch(error => {
-            console.log(error.response.data.message);
-        })
+        dispatch(addToCart({ productId: id }))
+        alert("Item added to cart")
     }
 
     useEffect(() => {

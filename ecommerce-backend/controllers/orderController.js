@@ -27,7 +27,7 @@ const getMyOrders = async (req, res) => {
 };
 
 const getAllOrders = async (req, res) => {
-  const orders = await Order.find().populate("user", " name email");
+  const orders = await Order.find().populate("user", "name email").populate("product", "_id name image category price");
   res.json(orders);
 };
 

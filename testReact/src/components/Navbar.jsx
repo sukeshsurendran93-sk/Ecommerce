@@ -1,21 +1,53 @@
-import { FaCartShopping, FaUser, FaTimeline, FaFirstOrder, FaRegFolder, FaFirstOrderAlt, FaProductHunt, FaShop } from "react-icons/fa6"
-import { Link, useNavigate } from "react-router-dom"
-import { useDispatch } from "react-redux"
-import { logout } from "../redux/slice/authSlice"
-import { useState } from "react"
+import {
+    FaCartShopping,
+    FaUser,
+    FaFirstOrderAlt,
+    FaShop
+} from "react-icons/fa6";
+import { Link, useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { logout } from "../redux/slice/authSlice";
+import { useState, useCallback } from "react";
 
 function Navbar() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     const navigate = useNavigate();
     const dispatch = useDispatch();
 
-    const isLoggedIn = !!localStorage.getItem("token");
+    // Better to use Redux state instead of localStorage
+    const { role, token } = useSelector((state) => state.auth);
+    const isLoggedIn = !!token;
 
-    const handleLogout = () => {
+    const handleLogout = useCallback(() => {
         dispatch(logout());
         navigate("/");
         setIsMenuOpen(false);
-    };
+    }, [dispatch, navigate]);
+
+    const closeMobileMenu = useCallback(() => {
+        setIsMenuOpen(false);
+    }, []);
+
+    // Centralized menu items (eliminates duplication)
+    const menuItems = [
+        {
+            to: "/",
+            icon: <FaShop className="text-xl" />,
+            label: "Products"
+        },
+        {
+            to: "/orders",
+            icon: <FaFirstOrderAlt className="text-xl" />,
+            label: "Orders"
+        },
+    ];
+    if (role === "user") {
+        menuItems.push({
+            to: "/cart",
+            icon: <FaCartShopping className="text-xl" />,
+            label: "Cart"
+        });
+    }
 
     return (
         <nav className="bg-black/80 backdrop-blur-xl border-b border-zinc-800 sticky top-0 z-50">
@@ -35,18 +67,17 @@ function Navbar() {
                     <div className="hidden md:flex items-center gap-8 text-lg">
                         {isLoggedIn ? (
                             <>
-                                <Link to="/" className="flex items-center gap-2 hover:text-violet-400 transition-colors">
-                                    <FaShop className="text-xl" /> Products
-                                </Link>
-                                <Link to="/orders" className="flex items-center gap-2 hover:text-violet-400 transition-colors">
-                                    <FaFirstOrderAlt className="text-xl" /> Order History
-                                </Link>
-                                <Link
-                                    to="/cart"
-                                    className="flex items-center gap-2 hover:text-violet-400 transition-colors"
-                                >
-                                    <FaCartShopping className="text-xl" /> Cart
-                                </Link>
+                                {menuItems.map((item) => (
+                                    <Link
+                                        key={item.to}
+                                        to={item.to}
+                                        className="flex items-center gap-2 hover:text-violet-400 transition-colors"
+                                    >
+                                        {item.icon}
+                                        {item.label}
+                                    </Link>
+                                ))}
+
                                 <button
                                     onClick={handleLogout}
                                     className="px-8 py-3 bg-red-600 text-white font-semibold rounded-3xl hover:bg-red-700 transition-all duration-300 flex items-center gap-2"
@@ -67,9 +98,10 @@ function Navbar() {
                     {/* Mobile Hamburger Button */}
                     <button
                         onClick={() => setIsMenuOpen(!isMenuOpen)}
-                        className="md:hidden text-3xl text-white focus:outline-none"
+                        className="md:hidden text-3xl text-white focus:outline-none transition-transform active:scale-90"
+                        aria-label={isMenuOpen ? "Close menu" : "Open menu"}
                     >
-                        {isMenuOpen ? <FaTimeline /> : "☰"}
+                        {isMenuOpen ? "✕" : "☰"}
                     </button>
                 </div>
 
@@ -79,16 +111,21 @@ function Navbar() {
                         <div className="flex flex-col gap-6 text-lg">
                             {isLoggedIn ? (
                                 <>
-                                    <Link
-                                        to="/cart"
-                                        className="flex items-center gap-3 hover:text-violet-400 transition-colors"
-                                        onClick={() => setIsMenuOpen(false)}
-                                    >
-                                        <FaCartShopping className="text-2xl" /> Cart
-                                    </Link>
+                                    {menuItems.map((item) => (
+                                        <Link
+                                            key={item.to}
+                                            to={item.to}
+                                            onClick={closeMobileMenu}
+                                            className="flex items-center gap-3 hover:text-violet-400 transition-colors"
+                                        >
+                                            {item.icon}
+                                            {item.label}
+                                        </Link>
+                                    ))}
+
                                     <button
                                         onClick={handleLogout}
-                                        className="w-full text-left flex items-center gap-3 text-red-500 hover:text-red-600 transition-colors"
+                                        className="w-full text-left flex items-center gap-3 text-red-500 hover:text-red-600 transition-colors py-2"
                                     >
                                         <FaUser /> Logout
                                     </button>
@@ -96,8 +133,8 @@ function Navbar() {
                             ) : (
                                 <Link
                                     to="/login"
+                                    onClick={closeMobileMenu}
                                     className="w-full py-4 bg-white text-black font-semibold rounded-3xl text-center hover:bg-violet-500 hover:text-white transition-all"
-                                    onClick={() => setIsMenuOpen(false)}
                                 >
                                     <FaUser className="inline mr-2" /> Login
                                 </Link>
