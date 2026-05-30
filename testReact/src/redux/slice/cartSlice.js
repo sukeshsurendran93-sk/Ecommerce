@@ -42,7 +42,7 @@ const cartSlice = createSlice({
                 state.error = action.payload;
             })
             .addCase(removeFromCart.fulfilled, (state, action) => {
-                state.items = state.items.filter((item) => item.id !== action.meta.arg);
+                state.items = state.items.filter((item) => item.productID !== action.meta.arg);
                 state.loading = false;
                 state.error = null;
             })

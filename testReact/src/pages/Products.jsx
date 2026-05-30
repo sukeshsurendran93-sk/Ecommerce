@@ -1,51 +1,55 @@
 import { useEffect, useState } from "react";
 import ProductCard from "../components/ProductCard";
 import ProductFilter from "../components/ProductFilter";
+import Recommendations from "../components/Recommendations";
 import { useDispatch, useSelector } from "react-redux";
 import { getProducts } from "../redux/thunks/productThunks";
+import api from "../api/axiosInstance";
 
 const Products = () => {
     const dispatch = useDispatch();
-    const { products, loading, error } = useSelector((state) => state.product)
+    const { products, loading, error } = useSelector((state) => state.product);
 
     const [filter, setFilter] = useState({
         search: "",
         category: "All",
         minPrice: "",
-        maxPrice: ""
+        maxPrice: "",
+        sortBy: ""
     });
 
-    // Fetch products
+    const [categories, setCategories] = useState(["All"]);
+
+    // Fetch categories once from backend API
     useEffect(() => {
-        dispatch(getProducts());
-    }, [dispatch]);
+        const fetchCategories = async () => {
+            try {
+                const res = await api.get("/products/categories");
+                if (res.data) {
+                    setCategories(["All", ...res.data]);
+                }
+            } catch (err) {
+                console.error("Failed to load categories:", err);
+            }
+        };
+        fetchCategories();
+    }, []);
 
-    // Filter logic
-    const filteredProducts = products.filter((product) => {
-        const searchMatch = !filter.search ||
-            product.name.toLowerCase().includes(filter.search.toLowerCase());
+    // Fetch products dynamically based on filters with a slight debounce on typing
+    useEffect(() => {
+        const delayDebounceFn = setTimeout(() => {
+            const queryParams = {};
+            if (filter.search.trim()) queryParams.keyword = filter.search.trim();
+            if (filter.category && filter.category !== "All") queryParams.category = filter.category;
+            if (filter.minPrice) queryParams.minPrice = filter.minPrice;
+            if (filter.maxPrice) queryParams.maxPrice = filter.maxPrice;
+            if (filter.sortBy) queryParams.sortBy = filter.sortBy;
 
-        const categoryMatch = filter.category === "All" ||
-            product.category === filter.category;
+            dispatch(getProducts(queryParams));
+        }, 300);
 
-        const minPriceMatch = !filter.minPrice ||
-            product.price >= Number(filter.minPrice);
-
-        const maxPriceMatch = !filter.maxPrice ||
-            product.price <= Number(filter.maxPrice);
-
-        return searchMatch && categoryMatch && minPriceMatch && maxPriceMatch;
-    });
-
-    const categories = ["All", ...new Set(products.map(p => p.category))];
-
-    if (loading) {
-        return (
-            <div className="flex justify-center items-center h-screen">
-                <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-violet-600"></div>
-            </div>
-        );
-    }
+        return () => clearTimeout(delayDebounceFn);
+    }, [dispatch, filter]);
 
     if (error) {
         return (
@@ -64,12 +68,16 @@ const Products = () => {
 
             <div className="max-w-9xl mx-auto px-6 py-16">
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                    {filteredProducts.length === 0 ? (
+                    {loading ? (
+                        <div className="col-span-full flex justify-center py-20">
+                            <div className="animate-spin rounded-full h-16 w-16 border-t-2 border-b-2 border-violet-600"></div>
+                        </div>
+                    ) : products.length === 0 ? (
                         <div className="col-span-full text-center text-zinc-400 text-lg py-20">
                             No products found
                         </div>
                     ) : (
-                        filteredProducts.map((product) => (
+                        products.map((product) => (
                             <ProductCard
                                 key={product._id}
                                 product={product}
@@ -78,6 +86,9 @@ const Products = () => {
                     )}
                 </div>
             </div>
+
+            {/* Recommendations System */}
+            <Recommendations />
         </>
     );
 };

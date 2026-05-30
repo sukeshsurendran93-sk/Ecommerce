@@ -24,7 +24,15 @@ const getProducts = async (req, res) => {
       if (req.query.minPrice) query.price.$gte = Number(req.query.minPrice);
       if (req.query.maxPrice) query.price.$lte = Number(req.query.maxPrice);
     }
-    const products = await Product.find(query);
+    let apiQuery = Product.find(query);
+    if (req.query.sortBy) {
+      if (req.query.sortBy === "price_asc") {
+        apiQuery = apiQuery.sort({ price: 1 });
+      } else if (req.query.sortBy === "price_desc") {
+        apiQuery = apiQuery.sort({ price: -1 });
+      }
+    }
+    const products = await apiQuery;
     res.status(200).json(products);
   } catch (error) {
     console.error(error);

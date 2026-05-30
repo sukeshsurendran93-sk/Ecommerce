@@ -2,7 +2,8 @@ import {
     FaCartShopping,
     FaUser,
     FaFirstOrderAlt,
-    FaShop
+    FaShop,
+    FaEnvelope
 } from "react-icons/fa6";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -35,19 +36,35 @@ function Navbar() {
             icon: <FaShop className="text-xl" />,
             label: "Products"
         },
-        {
+    ];
+
+    if (isLoggedIn) {
+        menuItems.push({
             to: "/orders",
             icon: <FaFirstOrderAlt className="text-xl" />,
             label: "Orders"
-        },
-    ];
-    if (role === "user") {
+        });
+
+        if (role === "user") {
+            menuItems.push({
+                to: "/cart",
+                icon: <FaCartShopping className="text-xl" />,
+                label: "Cart"
+            });
+        }
+
         menuItems.push({
-            to: "/cart",
-            icon: <FaCartShopping className="text-xl" />,
-            label: "Cart"
+            to: "/profile",
+            icon: <FaUser className="text-xl" />,
+            label: "Profile"
         });
     }
+
+    menuItems.push({
+        to: "/contact",
+        icon: <FaEnvelope className="text-xl" />,
+        label: "Contact"
+    });
 
     return (
         <nav className="bg-black/80 backdrop-blur-xl border-b border-zinc-800 sticky top-0 z-50">

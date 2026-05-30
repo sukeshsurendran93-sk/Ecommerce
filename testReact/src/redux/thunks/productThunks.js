@@ -3,9 +3,9 @@ import api from "../../api/axiosInstance.js";
 
 const getProducts = createAsyncThunk(
     "products/products",
-    async (_, { rejectWithValue }) => {
+    async (params, { rejectWithValue }) => {
         try {
-            const response = await api.get('/products');
+            const response = await api.get('/products', { params });
             return response.data;
         } catch (error) {
             return rejectWithValue(

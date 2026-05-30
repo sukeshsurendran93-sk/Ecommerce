@@ -3,6 +3,7 @@ import { useEffect } from "react";
 import { getProduct } from "../redux/thunks/productThunks";
 import { useDispatch, useSelector } from "react-redux";
 import { addToCart } from "../redux/thunks/cartThunks";
+import Recommendations from "../components/Recommendations";
 
 const ProductDetails = () => {
     const { id } = useParams();
@@ -119,8 +120,11 @@ const ProductDetails = () => {
                     </div>
                 </div>
             </div>
+
+            {/* AI Recommendations System */}
+            <Recommendations />
         </div>
     )
 }
 
-export default ProductDetails
+export default ProductDetails;
